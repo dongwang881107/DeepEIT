@@ -25,6 +25,7 @@ class DeepNet(torch.nn.Module):
         self.linear5 = torch.nn.Linear(layer_width, layer_width)
         self.linear6 = torch.nn.Linear(layer_width, layer_width)
         self.linear_out = torch.nn.Linear(layer_width, 1)
+        self.acti = torch.sigmoid()
 
     def forward(self, x):
         y = self.linear_in(x) # fully connect layer
@@ -111,16 +112,14 @@ def DGM(x,xb1,xb2,xb3,xb4,data_x):
     f_temp = f_whole(x)
     part_1 = torch.sum((-laplace_u + u_hat - f_temp) ** 2) / x.size()[0]
 
-    #  exact neumann  boundary value 
+    #  exact neumann boundary value 
     g_xb1 = -pi*torch.cos(pi*xb1[:,0]).reshape(-1,1)*torch.sin(pi*xb1[:,1]).reshape(-1,1)
     g_xb2 = pi*torch.cos(pi*xb2[:,0]).reshape(-1,1)*torch.sin(pi*xb2[:,1]).reshape(-1,1)
     g_xb3 = -pi*torch.sin(pi*xb3[:,0]).reshape(-1,1)*torch.cos(pi*xb3[:,1]).reshape(-1,1)
     g_xb4 = pi*torch.sin(pi*xb3[:,0]).reshape(-1,1)*torch.cos(pi*xb3[:,1]).reshape(-1,1)
 
-    
     g_xb1_x1 = pi**2*torch.sin(pi*xb1[:,0]).reshape(-1,1)*torch.sin(pi*xb1[:,1]).reshape(-1,1)
     g_xb1_x2 = -pi**2*torch.cos(pi*xb1[:,0]).reshape(-1,1)*torch.cos(pi*xb1[:,1]).reshape(-1,1)
-    
    
     g_xb2_x1 = -pi**2*torch.sin(pi*xb2[:,0]).reshape(-1,1)*torch.sin(pi*xb2[:,1]).reshape(-1,1)
     g_xb2_x2 = pi**2*torch.cos(pi*xb2[:,0]).reshape(-1,1)*torch.cos(pi*xb2[:,1]).reshape(-1,1)
