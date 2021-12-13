@@ -1,25 +1,49 @@
+from numpy import negative
 import torch.nn as nn
 
-# network architecture
-# fully connected network
-class EITNet(nn.Module): 
-    def __init__(self, input_width, layer_width):
-        super(EITNet, self).__init__()
-        self.linear_in = nn.Linear(input_width, layer_width)
-        self.linear1 = nn.Linear(layer_width, layer_width)
-        self.linear2 = nn.Linear(layer_width, layer_width)
-        self.linear3 = nn.Linear(layer_width, layer_width)
-        self.linear4 = nn.Linear(layer_width, layer_width)
-        self.linear5 = nn.Linear(layer_width, layer_width)
-        self.linear6 = nn.Linear(layer_width, layer_width)
-        self.linear_out = nn.Linear(layer_width, 1)
+# actication function
+def get_acti(acti):
+    return nn.ModuleDict([
+        ['relu', nn.ReLU()],
+        ['leaky_relu', nn.LeakyReLU(negative_slope=0.01)],
+        ['sigmoid', nn.Sigmoid()],
+        ['tanh', nn.Tanh()],
+        ['selu', nn.SELU()],
+        ['swish', nn.SiLU()],
+        ['none', nn.Identity()] 
+    ])[acti]
 
-        self.acti = nn.SiLU()
+# residual block
+class ResBlock(nn.Module):
+    def __init__(self, in_channels, out_channels, acti='swish'):
+        super().__init__()
+        self.in_channels = in_channels
+        self.out_channels = out_channels
+        self.acti = get_acti(acti)
+        self.blocks = nn.Sequential(
+            nn.Linear(in_channels, out_channels),
+            get_acti(acti),
+            nn.Linear(out_channels, in_channels),
+        )
 
     def forward(self, x):
-        y = self.linear_in(x) 
-        y = y + self.acti(self.linear2(self.acti(self.linear1(y)))) 
-        y = y + self.acti(self.linear4(self.acti(self.linear3(y)))) 
-        y = y + self.acti(self.linear6(self.acti(self.linear5(y)))) 
-        output = self.linear_out(y) 
-        return output
+        residual = x 
+        x = self.blocks(x)
+        x += residual
+        x = self.acti(x)
+        return x
+
+# network architecture
+# stack residual blocks one after another
+class EITNet(nn.Module):
+    def __init__(self, in_channels, out_channels, block=ResBlock, block_num=1):
+        super().__init__()
+        self.blocks = nn.Sequential(
+            nn.Linear(in_channels, out_channels),
+            *[block(out_channels, out_channels) for _ in range(block_num)],
+            nn.Linar(out_channels, 1)
+        )
+
+    def forward(self, x):
+        x = self.blocks(x)
+        return x
