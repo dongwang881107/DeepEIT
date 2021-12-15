@@ -14,7 +14,7 @@ def main(args):
         print('Create path : {}'.format(args.save_path))
 
     # generate supervised data
-    supervised_data = generate_supervised_points(args.num_supervised_points, args.lower, args.upper)
+    supervised_dataset = SupervisedPoints(args.num_supervised_points, args.lower, args.upper)
 
     # generate networks
     model_u = ResNet(args.num_channels)
@@ -26,7 +26,7 @@ def main(args):
     scheduler = optim.lr_scheduler.StepLR(optimizer, step_size=args.decay_iters, gamma=args.gamma)
 
     # build solver
-    solver = Solver(supervised_data, model_u, model_f, criterion, optimizer, scheduler, args)
+    solver = Solver(supervised_dataset, model_u, model_f, criterion, optimizer, scheduler, args)
 
     # training/testing
     if args.mode == 'train':

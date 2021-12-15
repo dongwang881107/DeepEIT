@@ -44,12 +44,11 @@ def boundary_loss(b_left, b_right, b_bottom, b_top, ub_left_pred, ub_right_pred,
     return torch.sum((g_pred-g_exact)**2)/b_left.size()[0]/4 + torch.sum((g_grad_pred-g_grad_exact)**2)/b_left.size()[0]/4
 
 # compute loss on the supervised points (supervised)
-def supervised_loss(s, us_pred):
-    us_exact = u(s)
+def supervised_loss(s, us_pred, us_exact):
     return torch.sum((us_pred-us_exact)**2)/s.size()[0]
 
 # combine all the losses together
-def compute_loss(x, b_left, b_right, b_bottom, b_top, s, ux_pred, ub_left_pred, ub_right_pred, ub_bottom_pred, ub_top_pred, us_pred, f_pred, args):
+def compute_loss(x, b_left, b_right, b_bottom, b_top, s, ux_pred, ub_left_pred, ub_right_pred, ub_bottom_pred, ub_top_pred, us_pred, us_exact, f_pred, args):
     lambda1 = args.lambda1
     lambda2 = args.lambda2
-    return  interior_loss(x, ux_pred, f_pred) + lambda1*boundary_loss(b_left, b_right, b_bottom, b_top, ub_left_pred, ub_right_pred, ub_bottom_pred, ub_top_pred) + lambda2*supervised_loss(s, us_pred)
+    return  interior_loss(x, ux_pred, f_pred) + lambda1*boundary_loss(b_left, b_right, b_bottom, b_top, ub_left_pred, ub_right_pred, ub_bottom_pred, ub_top_pred) + lambda2*supervised_loss(s, us_pred, us_exact)

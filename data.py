@@ -1,4 +1,25 @@
 import torch
+from torch.utils.data import Dataset
+
+# class supervised points
+class SupervisedPoints(Dataset):
+    def __init__(self, num_points, lower, upper, dim=2):
+        super().__init__()
+        self.num_points = num_points
+        self.lower = lower
+        self.upper = upper
+        self.dim = dim
+        self.points = self.generate_supervised_points()
+        self.solutions = u(self.points)
+
+    def __len__(self):
+        return self.num_points
+
+    def __getitem__(self, idx):
+        return self.points[idx], self.solutions[idx]
+
+    def generate_supervised_points(self):   
+        return self.lower+(self.upper-self.lower)*torch.rand(self.num_points, self.dim)   
 
 # generate random training points inside the domain Omega
 # square domain [0,1]x[0,1]

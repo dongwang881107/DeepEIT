@@ -6,17 +6,16 @@ import time
 from data import *
 
 class Solver(object):
-    def __init__(self, data_points, model_u, model_f, criterion, optimizer, scheduler, args):
+    def __init__(self, supervised_dataset, model_u, model_f, criterion, optimizer, scheduler, args):
         super().__init__()
         if args.device:
             self.device = torch.device(args.device)
         else:
             self.device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
 
-        self.data_points = data_points
+        self.supervised_dataset = supervised_dataset
         self.model_u = model_u
         self.model_f = model_f
-        self.data_points.to(self.device)
         self.model_u.to(self.device)
         self.model_f.to(self.device)
 
@@ -42,7 +41,6 @@ class Solver(object):
         ub_top_pred = self.model_u(b_top)
 
         return ub_left_pred, ub_right_pred, ub_bottom_pred, ub_top_pred
-
 
     # save model parameters
     def save_model(self):
@@ -75,6 +73,13 @@ class Solver(object):
     def train(self):
         start_time = time.time()
         training_loss = []
+        
+        # move supervised_points/solutions to self.device
+        s = self.supervised_dataset.points
+        us_exact = self.supervised_dataset.solutions
+        s.to(self.device)
+        us_exact.to(self.device)
+
         print('Training start!')
         for epoch in range(self.num_epochs):
             # generate random training points inside the domain and on the boundary
@@ -98,10 +103,10 @@ class Solver(object):
             # forward propagation
             ux_pred = self.model_u(x)
             ub_left_pred, ub_right_pred, ub_bottom_pred, ub_top_pred = self.propagate_boundary(b_left, b_right, b_bottom, b_top)
-            us_pred = self.model_u(self.data_points)
+            us_pred = self.model_u(s)
             f_pred = self.model_f(x)
             # compute loss
-            loss = self.criterion(x, b_left, b_right, b_bottom, b_top, self.data_points, ux_pred, ub_left_pred, ub_right_pred, ub_bottom_pred, ub_top_pred, us_pred, f_pred, self.args)
+            loss = self.criterion(x, b_left, b_right, b_bottom, b_top, s, ux_pred, ub_left_pred, ub_right_pred, ub_bottom_pred, ub_top_pred, us_pred, us_exact, f_pred, self.args)
             # backward propagation
             loss.backward()
             # optimize
