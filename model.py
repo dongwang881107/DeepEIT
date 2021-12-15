@@ -45,16 +45,3 @@ class ResNet(nn.Module):
     def forward(self, x):
         x = self.blocks(x)
         return x
-
-# class EITNet(nn.Module):
-#     def __init__(self, num_channels, num_blocks, dim=2, block=ResBlock):
-#         super().__init__()
-#         self.model_u = ResNet(num_channels[0], num_blocks[0], dim, block)
-#         self.model_f = ResNet(num_channels[1], num_blocks[1], dim, block)
-
-#     def interior_loss(self, x):
-#         u_pred = self.model_u(x)
-
-#     def boundary_loss(self, b):
-
-#     def supervised_loss(self):

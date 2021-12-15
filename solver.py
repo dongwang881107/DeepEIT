@@ -8,14 +8,15 @@ from data import *
 class Solver(object):
     def __init__(self, data_points, model_u, model_f, criterion, optimizer, scheduler, args):
         super().__init__()
-        self.data_points = data_points
-        self.model_u = model_u
-        self.model_f = model_f
-
         if args.device:
             self.device = torch.device(args.device)
         else:
             self.device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
+
+        self.data_points = data_points
+        self.model_u = model_u
+        self.model_f = model_f
+        self.data_points.to(self.device)
         self.model_u.to(self.device)
         self.model_f.to(self.device)
 
@@ -86,6 +87,12 @@ class Solver(object):
             b_bottom.requires_grad = True
             b_top.requires_grad = True
 
+            x = x.to(self.device)
+            b_left = b_left.to(self.device)
+            b_right = b_right.to(self.device)
+            b_bottom = b_bottom.to(self.device)
+            b_top = b_top.to(self.device)
+
             # zero the parameter gradients
             self.optimizer.zero_grad()
             # forward propagation
@@ -103,7 +110,7 @@ class Solver(object):
             # print statistics
             training_loss.append(loss.item())
             if epoch % self.print_iters == 0:
-                print('epoch = {}, loss = {}, time = {}'.format(epoch, loss, time.time()-start_time))
+                print('epoch = {}, loss = {:.4f}, time = {:.4f}'.format(epoch, loss, time.time()-start_time))
 
         # save models
         self.save_model()
@@ -111,7 +118,7 @@ class Solver(object):
         self.save_loss(training_loss)
         # save arguments
         self.save_arg()
-        print('Total running time is {}'.format(time.time()-start_time))
+        print('Total running time is {:.4f}'.format(time.time()-start_time))
         print('Training finished!')
     
     # test

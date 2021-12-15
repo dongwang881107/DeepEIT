@@ -41,7 +41,7 @@ def boundary_loss(b_left, b_right, b_bottom, b_top, ub_left_pred, ub_right_pred,
     g_exact = g_neumann(b_left, b_right, b_bottom, b_top)
     g_grad_exact = g_neumann_grad(b_left, b_right, b_bottom, b_top)
 
-    return torch.sum((g_pred-g_exact)**2)/b_left.size()[0] + torch.sum((g_grad_pred-g_grad_exact)**2)/b_left.size()[0]/4
+    return torch.sum((g_pred-g_exact)**2)/b_left.size()[0]/4 + torch.sum((g_grad_pred-g_grad_exact)**2)/b_left.size()[0]/4
 
 # compute loss on the supervised points (supervised)
 def supervised_loss(s, us_pred):
