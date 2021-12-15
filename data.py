@@ -1,4 +1,5 @@
 import torch
+import numpy as np
 from torch.utils.data import Dataset
 
 # class supervised points
@@ -47,13 +48,13 @@ def generate_supervised_points(num_points, lower, upper, dim=2):
 # ground truth solution of u(x)
 # u(x) = sin(pi*x1)*sin(pi*x2)
 def u(x):   
-    return torch.sin(torch.pi*x[:,0]).reshape(-1,1) * torch.sin(torch.pi*x[:,1]).reshape(-1,1)
+    return torch.sin(np.pi*x[:,0]).reshape(-1,1) * torch.sin(np.pi*x[:,1]).reshape(-1,1)
 
 # ground truth solution of f(x)
 # computed according to u(x)
 # f(x) = (2*pi*pi+1)*sin(pi*x1)*sin(pi*x2)
 def f(x):             
-    return (2*torch.pi**2+1)*torch.sin(torch.pi*x[:,0]).reshape(-1,1) * torch.sin(torch.pi*x[:,1]).reshape(-1,1)
+    return (2*np.pi**2+1)*torch.sin(np.pi*x[:,0]).reshape(-1,1) * torch.sin(np.pi*x[:,1]).reshape(-1,1)
 
 # ground truth Neumann boundary condition g(x)
 # computed according to u(x) and boundary 
@@ -62,29 +63,29 @@ def f(x):
 # when x is on the bottom boundary x2=0, the outer normal vector is (0,-1), thus g(x) = -pi*sin(pi*x1)*cos(pi*x2)
 # when x is on the top    boundary x2=1, the outer normal vector is (0, 1), thus g(x) =  pi*sin(pi*x1)*cos(pi*x2)
 def g_neumann(b_left, b_right, b_bottom, b_top):
-    g_left   = -torch.pi*torch.cos(torch.pi*b_left[:,0]).reshape(-1,1) * torch.sin(torch.pi*b_left[:,1]).reshape(-1,1)
-    g_right  =  torch.pi*torch.cos(torch.pi*b_right[:,0]).reshape(-1,1) * torch.sin(torch.pi*b_right[:,1]).reshape(-1,1)
-    g_bottom = -torch.pi*torch.sin(torch.pi*b_bottom[:,0]).reshape(-1,1) * torch.cos(torch.pi*b_bottom[:,1]).reshape(-1,1)
-    g_top    =  torch.pi*torch.sin(torch.pi*b_top[:,0]).reshape(-1,1) * torch.cos(torch.pi*b_top[:,1]).reshape(-1,1)
+    g_left   = -np.pi*torch.cos(np.pi*b_left[:,0]).reshape(-1,1) * torch.sin(np.pi*b_left[:,1]).reshape(-1,1)
+    g_right  =  np.pi*torch.cos(np.pi*b_right[:,0]).reshape(-1,1) * torch.sin(np.pi*b_right[:,1]).reshape(-1,1)
+    g_bottom = -np.pi*torch.sin(np.pi*b_bottom[:,0]).reshape(-1,1) * torch.cos(np.pi*b_bottom[:,1]).reshape(-1,1)
+    g_top    =  np.pi*torch.sin(np.pi*b_top[:,0]).reshape(-1,1) * torch.cos(np.pi*b_top[:,1]).reshape(-1,1)
     return torch.cat((g_left,g_right,g_bottom,g_top),1)
 
 # gradient of ground truth Neumann boundary condition g(x)
 # computed according to g(x)
 def g_neumann_grad(b_left, b_right, b_bottom, b_top):
-    g_left_grad_x1 =  torch.pi**2*torch.sin(torch.pi*b_left[:,0]).reshape(-1,1,1) * torch.sin(torch.pi*b_left[:,1]).reshape(-1,1,1)
-    g_left_grad_x2 = -torch.pi**2*torch.cos(torch.pi*b_left[:,0]).reshape(-1,1,1) * torch.cos(torch.pi*b_left[:,1]).reshape(-1,1,1)
+    g_left_grad_x1 =  np.pi**2*torch.sin(np.pi*b_left[:,0]).reshape(-1,1,1) * torch.sin(np.pi*b_left[:,1]).reshape(-1,1,1)
+    g_left_grad_x2 = -np.pi**2*torch.cos(np.pi*b_left[:,0]).reshape(-1,1,1) * torch.cos(np.pi*b_left[:,1]).reshape(-1,1,1)
     g_left_grad = torch.cat((g_left_grad_x1,g_left_grad_x2),1)
    
-    g_right_grad_x1 = -torch.pi**2*torch.sin(torch.pi*b_right[:,0]).reshape(-1,1,1) * torch.sin(torch.pi*b_right[:,1]).reshape(-1,1,1)
-    g_right_grad_x2 =  torch.pi**2*torch.cos(torch.pi*b_right[:,0]).reshape(-1,1,1) * torch.cos(torch.pi*b_right[:,1]).reshape(-1,1,1)
+    g_right_grad_x1 = -np.pi**2*torch.sin(np.pi*b_right[:,0]).reshape(-1,1,1) * torch.sin(np.pi*b_right[:,1]).reshape(-1,1,1)
+    g_right_grad_x2 =  np.pi**2*torch.cos(np.pi*b_right[:,0]).reshape(-1,1,1) * torch.cos(np.pi*b_right[:,1]).reshape(-1,1,1)
     g_right_grad = torch.cat((g_right_grad_x1,g_right_grad_x2),1)
 
-    g_bottom_grad_x1 = -torch.pi**2*torch.cos(torch.pi*b_bottom[:,0]).reshape(-1,1,1) * torch.cos(torch.pi*b_bottom[:,1]).reshape(-1,1,1)
-    g_bottom_grad_x2 =  torch.pi**2*torch.sin(torch.pi*b_bottom[:,0]).reshape(-1,1,1) * torch.sin(torch.pi*b_bottom[:,1]).reshape(-1,1,1)
+    g_bottom_grad_x1 = -np.pi**2*torch.cos(np.pi*b_bottom[:,0]).reshape(-1,1,1) * torch.cos(np.pi*b_bottom[:,1]).reshape(-1,1,1)
+    g_bottom_grad_x2 =  np.pi**2*torch.sin(np.pi*b_bottom[:,0]).reshape(-1,1,1) * torch.sin(np.pi*b_bottom[:,1]).reshape(-1,1,1)
     g_bottom_grad = torch.cat((g_bottom_grad_x1,g_bottom_grad_x2),1)
 
-    g_top_grad_x1 =  torch.pi**2*torch.cos(torch.pi*b_top[:,0]).reshape(-1,1,1) * torch.cos(torch.pi*b_top[:,1]).reshape(-1,1,1)
-    g_top_grad_x2 = -torch.pi**2*torch.sin(torch.pi*b_top[:,0]).reshape(-1,1,1) * torch.sin(torch.pi*b_top[:,1]).reshape(-1,1,1)
+    g_top_grad_x1 =  np.pi**2*torch.cos(np.pi*b_top[:,0]).reshape(-1,1,1) * torch.cos(np.pi*b_top[:,1]).reshape(-1,1,1)
+    g_top_grad_x2 = -np.pi**2*torch.sin(np.pi*b_top[:,0]).reshape(-1,1,1) * torch.sin(np.pi*b_top[:,1]).reshape(-1,1,1)
     g_top_grad = torch.cat((g_top_grad_x1,g_top_grad_x2),1)
 
     return torch.cat((g_left_grad,g_right_grad,g_bottom_grad,g_top_grad),2)
