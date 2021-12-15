@@ -39,7 +39,7 @@ class ResNet(nn.Module):
         self.blocks = nn.Sequential(
             nn.Linear(dim, num_channels),
             *[block(num_channels) for _ in range(num_blocks)],
-            nn.Linar(num_channels, 1)
+            nn.Linear(num_channels, 1)
         )
 
     def forward(self, x):
@@ -54,7 +54,6 @@ class ResNet(nn.Module):
 
 #     def interior_loss(self, x):
 #         u_pred = self.model_u(x)
-
 
 #     def boundary_loss(self, b):
 
