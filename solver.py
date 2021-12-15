@@ -77,8 +77,8 @@ class Solver(object):
         # move supervised_points/solutions to self.device
         s = self.supervised_dataset.points
         us_exact = self.supervised_dataset.solutions
-        s.to(self.device)
-        us_exact.to(self.device)
+        s = s.to(self.device)
+        us_exact = us_exact.to(self.device)
 
         print('Training start!')
         for epoch in range(self.num_epochs):
@@ -115,7 +115,7 @@ class Solver(object):
             # print statistics
             training_loss.append(loss.item())
             if epoch % self.print_iters == 0:
-                print('epoch = {}, loss = {:.4f}, time = {:.4f}'.format(epoch, loss, time.time()-start_time))
+                print('epoch = {}, loss = {:.4f}, time = {:.4f}'.format(epoch, loss.detach(), time.time()-start_time))
 
         # save models
         self.save_model()
