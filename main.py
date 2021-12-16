@@ -1,12 +1,8 @@
 import os
-import sys
 import argparse
-import torch.optim as optim
 
 from solver import *
 from data import *
-from model import *
-from loss import *
 
 def main(args):
     # set seed and data type
@@ -22,32 +18,15 @@ def main(args):
     if args.mode == 'train':
         # generate supervised data
         supervised_dataset = SupervisedPoints(args.num_supervised_points, args.lower, args.upper)
-        # generate networks
-        model_u = ResNet(args.num_channels, args.num_blocks).to(args.device)
-        model_f = ResNet(args.num_channels, args.num_blocks).to(args.device)
-        # loss function and optimizer
-        criterion = compute_loss
-        optimizer = optim.Adam([{'params':model_u.parameters(),'lr':args.lr}, {'params':model_f.parameters(),'lr':args.lr}])
-        scheduler = optim.lr_scheduler.StepLR(optimizer, step_size=args.decay_iters, gamma=args.gamma)
         # build solver
-        args.criterion = criterion
-        args.optimizer = optimizer
-        args.scheduler = scheduler
-        solver = Solver(supervised_dataset, model_u, model_f, args)
+        solver = Solver(supervised_dataset, args)
         # training
         solver.train()
     else:
         # generate testing data
         testing_dataset = SupervisedPoints(args.num_testing_points, 0, 1)
-        # load networks
-        model_u = ResNet(args.num_channels, args.num_blocks).to(args.device)
-        model_f = ResNet(args.num_channels, args.num_blocks).to(args.device)
-        model_u_path = os.path.join(args.save_path, args.model_name+'_u.pkl')
-        model_f_path = os.path.join(args.save_path, args.model_name+'_f.pkl')
-        model_u.load_state_dict(torch.load(model_u_path))
-        model_f.load_state_dict(torch.load(model_f_path))
         # bulid solver
-        solver = Solver(testing_dataset, model_u, model_f, args)
+        solver = Solver(testing_dataset, args)
         # testing
         solver.test()
 

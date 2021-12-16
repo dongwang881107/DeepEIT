@@ -2,43 +2,49 @@ import torch
 import os
 import numpy as np
 import time
+import torch.optim as optim
 
 from data import *
+from model import *
+from loss import *
 from measure import *
 
 class Solver(object):
-    def __init__(self, dataset, model_u, model_f, args):
+    def __init__(self, dataset, args):
         super().__init__()
 
+        # load shared parameters
+        self.save_path = args.save_path
+        self.model_name = args.model_name
         self.device = torch.device(args.device)
+        self.args = args
 
-        self.dataset = dataset
-        self.model_u = model_u
-        self.model_f = model_f
+        # generate networks and move to self.device
+        self.model_u = ResNet(args.num_channels, args.num_blocks).to(self.device)
+        self.model_f = ResNet(args.num_channels, args.num_blocks).to(self.device)
         
         # move supervised_points/solutions to self.device
-        s = self.dataset.points
-        us_exact = self.dataset.solutions
+        s = dataset.points
+        us_exact = dataset.solutions
         s = s.to(self.device)
         us_exact = us_exact.to(self.device)
         self.s = s
         self.us_exact = us_exact
 
+        # train | test
         if args.mode == 'train':
-            self.criterion = args.criterion
-            self.optimizer = args.optimizer
-            self.scheduler = args.scheduler
-
+            # loss function and optimizer
+            self.criterion = compute_loss
+            self.optimizer = optim.Adam([{'params':self.model_u.parameters(),'lr':args.lr}, {'params':self.model_f.parameters(),'lr':args.lr}])
+            self.scheduler = optim.lr_scheduler.StepLR(self.optimizer, step_size=args.decay_iters, gamma=args.gamma)
+            # load training parameters
             self.num_interior_points = args.num_interior_points
             self.num_boundary_points = args.num_boundary_points
             self.num_epochs = args.num_epochs
             self.print_iters = args.print_iters
         else:
-            self.num_testing_points = args.num_testing_points
-        
-        self.save_path = args.save_path
-        self.model_name = args.model_name
-        self.args = args
+            # load model
+            self.load_model()
 
     # propagate on the boundary
     def propagate_boundary(self, b_left, b_right, b_bottom, b_top):
@@ -59,8 +65,13 @@ class Solver(object):
         print('Model f saved in {}'.format(model_f_path))
 
     # load model parameters
-    def load_model(self, model_path):
-        self.model.load_state_dict(torch.load(model_path))
+    def load_model(self):
+        model_u_path = os.path.join(self.save_path, self.model_name+'_u.pkl')
+        model_f_path = os.path.join(self.save_path, self.model_name+'_f.pkl')
+        self.model_u.load_state_dict(torch.load(model_u_path))
+        self.model_f.load_state_dict(torch.load(model_f_path))
+        print('Load model u')
+        print('Load model f')
 
     # save training losses
     def save_loss(self, loss):
