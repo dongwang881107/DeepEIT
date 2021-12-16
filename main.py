@@ -51,9 +51,15 @@ def main(args):
         # testing
         solver.test()
 
+# usage function
+def usage():
+    return '''
+    python main.py {train, test} [optional arguments]
+    '''
+
 if __name__ == "__main__":
     # parse arguments
-    parser = argparse.ArgumentParser(prog='DL-EIT')
+    parser = argparse.ArgumentParser(prog='DL-EIT', usage=usage())
     subparsers = parser.add_subparsers(dest = 'mode', required=True, help='train | test')
 
     # shared paramters
@@ -65,7 +71,6 @@ if __name__ == "__main__":
     parser.add_argument('--model_name', type=str, default='model', help='name of the models')
     # training parameters
     subparser_train = subparsers.add_parser('train', help='training mode')
-    subparser_train.add_argument('--mode', type=str, default='train', help='train | test')
     subparser_train.add_argument('--num_interior_points', type=int, default=1000, help='number of interior points inside the domain Omega')
     subparser_train.add_argument('--num_boundary_points', type=int, default=100, help='number of points on the boundary partial Omega')
     subparser_train.add_argument('--num_supervised_points', type=int, default=1000, help='number of supervised points inside the domain Omega_0')
@@ -80,7 +85,6 @@ if __name__ == "__main__":
     subparser_train.add_argument('--print_iters', type=int, default=100, help='number of iterations to print statistics')
     # testing parameters
     subparser_test = subparsers.add_parser('test', help='testing mode')
-    subparser_test.add_argument('--mode', type=str, default='test', help='train | test')
     subparser_test.add_argument('--num_testing_points', type=int, default=1000, help='number of testing points')
 
     args = parser.parse_args()
