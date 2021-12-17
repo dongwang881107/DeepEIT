@@ -1,10 +1,11 @@
 import torch
 import numpy as np
+import sys
 from torch.utils.data import Dataset
 
 # class supervised points
 class SupervisedPoints(Dataset):
-    def __init__(self, num_points, lower, upper, mode='random', dim=2):
+    def __init__(self, num_points, lower, upper, mode='train', dim=2):
         super().__init__()
         self.num_points = num_points
         self.lower = lower
@@ -20,8 +21,19 @@ class SupervisedPoints(Dataset):
     def __getitem__(self, idx):
         return self.points[idx], self.solutions[idx]
 
-    def generate_supervised_points(self):   
-        return self.lower+(self.upper-self.lower)*torch.rand(self.num_points, self.dim)   
+    def generate_supervised_points(self):
+        if self.mode =='train':   
+            return self.lower+(self.upper-self.lower)*torch.rand(self.num_points, self.dim)
+        elif self.mode == 'test':
+            x1 = torch.linspace(self.lower, self.upper, self.num_points)
+            x2 = torch.linspace(self.lower, self.upper, self.num_points)
+            [X1,X2] = torch.meshgrid(x1, x2)
+            x1 = X1.reshape(self.num_points*self.num_points, 1)
+            x2 = X2.reshape(self.num_points*self.num_points, 1)
+            return torch.cat((x1,x2),1)
+        else:
+            print('train | test')
+            sys.exit(0)
 
 # generate random training points inside the domain Omega
 # square domain [0,1]x[0,1]
@@ -54,8 +66,8 @@ def u(x):
 # ground truth solution of f(x)
 # computed according to u(x)
 # f(x) = (2*pi*pi+1)*sin(pi*x1)*sin(pi*x2)
-def f(x):             
-    return (2*np.pi**2+1)*torch.sin(np.pi*x[:,0]).reshape(-1,1) * torch.sin(np.pi*x[:,1]).reshape(-1,1)
+def f(b):             
+    return (2*np.pi**2+1)*torch.sin(np.pi*b[:,0]).reshape(-1,1) * torch.sin(np.pi*b[:,1]).reshape(-1,1)
 
 # ground truth Neumann boundary condition g(x)
 # computed according to u(x) and boundary 

@@ -3,6 +3,7 @@ import argparse
 
 from solver import *
 from data import *
+from postprocessing import *
 
 def main(args):
     # set seed and data type
@@ -22,13 +23,15 @@ def main(args):
         solver = Solver(supervised_dataset, args)
         # training
         solver.train()
-    else:
+    elif args.mode == 'test':
         # generate testing data
-        testing_dataset = SupervisedPoints(args.num_testing_points, 0, 1)
+        testing_dataset = SupervisedPoints(args.num_testing_points, 0., 1., mode='test')
         # bulid solver
         solver = Solver(testing_dataset, args)
         # testing
         solver.test()
+    else:
+        plot_loss_history()
 
 # usage function
 def usage():
@@ -39,7 +42,7 @@ def usage():
 if __name__ == "__main__":
     # parse arguments
     parser = argparse.ArgumentParser(prog='DL-EIT', usage=usage())
-    subparsers = parser.add_subparsers(dest = 'mode', required=True, help='train | test')
+    subparsers = parser.add_subparsers(dest = 'mode', required=True, help='train | test | plot')
 
     # shared paramters
     parser.add_argument('--device', type=str, default='cpu', help='cpu | cuda')
@@ -62,9 +65,15 @@ if __name__ == "__main__":
     subparser_train.add_argument('--gamma', type=float, default=0.5, help='decay value of the learning rate')
     subparser_train.add_argument('--num_epochs', type=int, default=20000, help='number of epochs')
     subparser_train.add_argument('--print_iters', type=int, default=100, help='number of iterations to print statistics')
+    subparser_train.add_argument('--loss_name', type=str, default='training_loss', help='name of the training loss')
+    subparser_train.add_argument('--arg_name', type=str, default='training_arg', help='name of the arguments')
     # testing parameters
     subparser_test = subparsers.add_parser('test', help='testing mode')
-    subparser_test.add_argument('--num_testing_points', type=int, default=1000, help='number of testing points')
+    subparser_test.add_argument('--num_testing_points', type=int, default=500, help='number of testing points')
+    subparser_test.add_argument('--testing_result_name', type=str, default='testing_result', help='name of testing results')
+    # plotting parameters
+    subparser_plot = subparsers.add_parser('plot', help='plotting mode')
+    subparser_plot.add_argument('--plotting_result_name', type=str, default='testing_result', help='name of testing results')
 
     args = parser.parse_args()
 

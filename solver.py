@@ -7,7 +7,7 @@ import torch.optim as optim
 from data import *
 from model import *
 from loss import *
-from measure import *
+from metric import *
 
 class Solver(object):
     def __init__(self, dataset, args):
@@ -42,7 +42,11 @@ class Solver(object):
             self.num_boundary_points = args.num_boundary_points
             self.num_epochs = args.num_epochs
             self.print_iters = args.print_iters
-        else:
+            self.loss_name = args.loss_name
+            self.arg_name = args.arg_name
+        elif args.mode == 'test':
+            #load testing parameters
+            self.testing_result_name = args.testing_result_name
             # load model
             self.load_model()
 
@@ -75,13 +79,13 @@ class Solver(object):
 
     # save training losses
     def save_loss(self, loss):
-        loss_path = os.path.join(self.save_path, 'loss.npy')
+        loss_path = os.path.join(self.save_path, self.loss_name+'.npy')
         np.save(loss_path, loss)
         print('Loss saved in {}'.format(loss_path))
 
     # save training arguments
     def save_arg(self):
-        arg_path = os.path.join(self.save_path, 'args.txt')
+        arg_path = os.path.join(self.save_path, self.arg_name+'.txt')
         argsDict = self.args.__dict__
         with open(arg_path,'w') as file:
             for arg, value in argsDict.items():
@@ -148,10 +152,20 @@ class Solver(object):
             u_relative_error, u_l2_error = compute_measure(ux_pred, self.us_exact) 
             f_relative_error, f_l2_error = compute_measure(f_pred, f_exact) 
 
+        # print results
         print('Relative error of u is {:.4f}'.format(u_relative_error))
         print('L2 error of u is {:.4f}'.format(u_l2_error))
         print('Relative error of f is {:.4f}'.format(f_relative_error))
         print('L2 error of f is {:.4f}'.format(f_l2_error))
 
+        # save results
+        testing_result_path = os.path.join(self.save_path, self.testing_result_name+'.npz')
+        s = self.s
+        us_exact = self.us_exact
+        np.savez(testing_result_path, 
+            u_relative_error=u_relative_error, f_relative_error=f_relative_error,
+            u_l2_error=u_l2_error, f_l2_error=f_l2_error,
+            s=s, ux_pred=ux_pred, us_exact=us_exact, 
+            f_pred=f_pred, f_exact=f_exact)
+        print('Testing resuts saved in {}'.format(testing_result_path))
         print('Testing finished!')
-            
