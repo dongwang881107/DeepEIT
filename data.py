@@ -4,11 +4,12 @@ from torch.utils.data import Dataset
 
 # class supervised points
 class SupervisedPoints(Dataset):
-    def __init__(self, num_points, lower, upper, dim=2):
+    def __init__(self, num_points, lower, upper, mode='random', dim=2):
         super().__init__()
         self.num_points = num_points
         self.lower = lower
         self.upper = upper
+        self.mode = mode
         self.dim = dim
         self.points = self.generate_supervised_points()
         self.solutions = u(self.points)
