@@ -14,7 +14,7 @@ def get_acti(acti):
 
 # residual block
 class ResBlock(nn.Module):
-    def __init__(self, num_channels, acti='swish'):
+    def __init__(self, num_channels, acti):
         super().__init__()
         self.num_channels = num_channels
         self.acti = get_acti(acti)
@@ -34,11 +34,11 @@ class ResBlock(nn.Module):
 # network architecture
 # stack residual blocks one after another
 class ResNet(nn.Module):
-    def __init__(self, num_channels, num_blocks=3, dim=2, block=ResBlock):
+    def __init__(self, num_channels, num_blocks, acti, dim=2, block=ResBlock):
         super().__init__()
         self.blocks = nn.Sequential(
             nn.Linear(dim, num_channels),
-            *[block(num_channels) for _ in range(num_blocks)],
+            *[block(num_channels, acti) for _ in range(num_blocks)],
             nn.Linear(num_channels, 1)
         )
 

@@ -13,13 +13,12 @@ class SupervisedPoints(Dataset):
         self.mode = mode
         self.dim = dim
         self.points = self.generate_supervised_points()
-        self.solutions = u(self.points)
 
     def __len__(self):
         return self.num_points
 
     def __getitem__(self, idx):
-        return self.points[idx], self.solutions[idx]
+        return self.points[idx]
 
     def generate_supervised_points(self):
         if self.mode =='train':   
