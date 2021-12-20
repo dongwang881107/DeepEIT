@@ -27,13 +27,13 @@ def main(args):
         solver.train()
     elif args.mode == 'test':
         # generate testing data
-        testing_dataset = SupervisedPoints(args.num_testing_points, 0., 1., mode='test')
+        testing_dataset = SupervisedPoints(args.num_testing_points, 0, 1, mode='test')
         # bulid solver
         solver = Solver(testing_dataset, args)
         # testing
         solver.test()
     else:
-        plot_loss_history()
+        plot_result(args)
 
 # usage function
 def usage():
@@ -49,11 +49,7 @@ if __name__ == "__main__":
     # shared paramters
     parser.add_argument('--device', type=str, default='cpu', help='cpu | cuda')
     parser.add_argument('--seed', type=int, default=1000, help='random seed')
-    parser.add_argument('--num_channels', type=int, default=6, help='hidden layer width of network')
-    parser.add_argument('--num_blocks', type=int, default=3, help='number of residual blocks of network')
-    parser.add_argument('--acti', type=str, default='swish', help='activation function of the network')
     parser.add_argument('--save_path', type=str, default='./result', help='saved path of the results')
-    parser.add_argument('--model_name', type=str, default='model', help='name of the models')
     # training parameters
     subparser_train = subparsers.add_parser('train', help='training mode')
     subparser_train.add_argument('--num_interior_points', type=int, default=1000, help='number of interior points inside the domain Omega')
@@ -61,25 +57,42 @@ if __name__ == "__main__":
     subparser_train.add_argument('--num_supervised_points', type=int, default=1000, help='number of supervised points inside the domain Omega_0')
     subparser_train.add_argument('--lower', type=float, default=0.5, help='lower bound of Omega_0')
     subparser_train.add_argument('--upper', type=float, default=0.75, help='upper bound of Omega_0')
+    subparser_train.add_argument('--num_channels', type=int, default=6, help='hidden layer width of network')
+    subparser_train.add_argument('--num_blocks', type=int, default=3, help='number of residual blocks of network')
+    subparser_train.add_argument('--acti', type=str, default='swish', help='activation function of the network')
     subparser_train.add_argument('--lambda1', type=float, default=1, help='hyper-parameter for the boundary loss')
-    subparser_train.add_argument('--lambda2', type=float, default=100, help='hyper parameter for the supervised loss')
+    subparser_train.add_argument('--lambda2', type=float, default=1, help='hyper parameter for the supervised loss')
+    subparser_train.add_argument('--model_name', type=str, default='model', help='name of the models')
     subparser_train.add_argument('--lr_u', type=float, default=1e-3, help='learning rate of model_u')
     subparser_train.add_argument('--lr_f', type=float, default=1e-3, help='learning rate of model_f')
     subparser_train.add_argument('--decay_iters', type=int, default=1000, help='number of iterations to decay learning rate')
     subparser_train.add_argument('--gamma', type=float, default=0.5, help='decay value of the learning rate')
-    subparser_train.add_argument('--num_epochs', type=int, default=20000, help='number of epochs')
-    subparser_train.add_argument('--print_iters', type=int, default=100, help='number of iterations to print statistics')
+    subparser_train.add_argument('--num_epochs', type=int, default=10000, help='number of epochs')
+    subparser_train.add_argument('--print_iters', type=int, default=200, help='number of iterations to print statistics')
     subparser_train.add_argument('--loss_name', type=str, default='training_loss', help='name of the training loss')
     subparser_train.add_argument('--arg_name', type=str, default='training_arg', help='name of the arguments')
     # testing parameters
     subparser_test = subparsers.add_parser('test', help='testing mode')
     subparser_test.add_argument('--num_testing_points', type=int, default=500, help='number of testing points')
+    subparser_test.add_argument('--num_channels', type=int, default=6, help='hidden layer width of network')
+    subparser_test.add_argument('--num_blocks', type=int, default=3, help='number of residual blocks of network')
+    subparser_test.add_argument('--acti', type=str, default='swish', help='activation function of the network')
+    subparser_test.add_argument('--model_name', type=str, default='model', help='name of the models')
     subparser_test.add_argument('--testing_result_name', type=str, default='testing_result', help='name of testing results')
     # plotting parameters
     subparser_plot = subparsers.add_parser('plot', help='plotting mode')
-    subparser_plot.add_argument('--plotting_result_name', type=str, default='testing_result', help='name of testing results')
+    subparser_plot.add_argument('--num_testing_points', type=int, default=500, help='number of testing points')
+    subparser_plot.add_argument('--plotting_result_name', type=str, default='testing_result', help='name of testing results to be plotted')
+    subparser_plot.add_argument('--loss_name', type=str, default='training_loss', help='name of the training loss')
+    subparser_plot.add_argument('--plot_mode', type=str, default='contourf', help='countourf | imshow')
+    subparser_plot.add_argument('--not_plot_loss', action='store_false', help='not to plot training loss')
+    subparser_plot.add_argument('--not_plot_u', action='store_false', help='not to plot the predictions of model_u')
+    subparser_plot.add_argument('--not_plot_f', action='store_false', help='not to plot the predictions of model_f')
+    subparser_plot.add_argument('--not_save_plot', action='store_false', help='not to save the plot')
+    subparser_plot.add_argument('--plot_name', type=str, default='plot', help='name of the saved plots')
 
     args = parser.parse_args()
 
     # run the main function
     main(args)
+

@@ -91,12 +91,12 @@ class Solver(object):
                 print('epoch = {}, loss = {:.4f}, time = {:.4f}'.format(epoch, loss.detach(), time.time()-start_time))
 
         # save models
-        save_model(self.model_u, self.model_u, self.args)
+        save_model(self.model_u, self.model_f, self.args)
         # save losses
         save_loss(training_loss, self.args)
         # save arguments
         save_arg(self.args)
-        print('Total training time is {:.4f}'.format(time.time()-start_time))
+        print('Total training time is {:.4f} s'.format(time.time()-start_time))
         print('Training finished!')
     
     # test
@@ -109,8 +109,8 @@ class Solver(object):
             f_pred = self.model_f(self.s)
             u_exact = u(self.s).to(self.device)
             f_exact = f(self.s).to(self.device)
-            u_relative_error, u_l2_error = compute_measure(u_pred, u_exact) 
-            f_relative_error, f_l2_error = compute_measure(f_pred, f_exact) 
+            u_relative_error, u_l2_error = compute_metric(u_pred, u_exact) 
+            f_relative_error, f_l2_error = compute_metric(f_pred, f_exact) 
 
         # print results
         print('Relative error of u is {:.4f}'.format(u_relative_error))
@@ -119,6 +119,6 @@ class Solver(object):
         print('L2 error of f is {:.4f}'.format(f_l2_error))
 
         # save results
-        save_result(u_relative_error, f_relative_error, u_l2_error, f_l2_error, self.s, u_pred, u_exact, f_pred, f_exact, self.args)
-        print('Total testing time is {:.4f}'.format(time.time()-start_time))
+        save_result(u_relative_error, f_relative_error, u_l2_error, f_l2_error, u_pred, u_exact, f_pred, f_exact, self.args)
+        print('Total testing time is {:.4f} s'.format(time.time()-start_time))
         print('Testing finished!')
