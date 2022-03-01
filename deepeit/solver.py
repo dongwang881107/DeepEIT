@@ -1,6 +1,5 @@
 import torch
 import time
-import torch.optim as optim
 
 from deepeit.model import *
 from deepeit.metric import *

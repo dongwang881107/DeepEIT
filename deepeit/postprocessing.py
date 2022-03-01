@@ -349,12 +349,12 @@ def plot_pred(model_name, args, dim=0):
 
     if model_name =='sigma':
         ax1.set_title('$\sigma_\mathrm{exact}$', fontsize=fs)
-        ax2.set_title('$\sigma_\mathrm{proposed}$', fontsize=fs)
-        ax3.set_title('|$\sigma_\mathrm{proposed}$-$\sigma_\mathrm{exact}$|', fontsize=fs)
+        ax2.set_title('$\sigma_\mathrm{pred}$', fontsize=fs)
+        ax3.set_title('|$\sigma_\mathrm{pred}$-$\sigma_\mathrm{exact}$|', fontsize=fs)
     else:
         ax1.set_title('$'+model_name+'_\mathrm{exact}$', fontsize=fs)
-        ax2.set_title('$'+model_name+'_\mathrm{proposed}$', fontsize=fs)
-        ax3.set_title('|'+'$'+model_name+'_\mathrm{proposed}$-$'+model_name+'_\mathrm{exact}$|', fontsize=fs)
+        ax2.set_title('$'+model_name+'_\mathrm{pred}$', fontsize=fs)
+        ax3.set_title('|'+'$'+model_name+'_\mathrm{pred}$-$'+model_name+'_\mathrm{exact}$|', fontsize=fs)
     ax1.axis('off')
     ax2.axis('off')
     ax3.axis('off')

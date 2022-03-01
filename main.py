@@ -24,31 +24,15 @@ def main(args):
 
     # determine solution
     def g_func(x):
-        return (torch.sin(np.pi*x[:,0])*torch.sinh(np.pi*x[:,1])).reshape(-1,1) # 2D Case
-        # return (torch.sin(np.pi*x[:,0])*torch.sinh(np.pi*x[:,1])*x[:,2]).reshape(-1,1) # 2D Case
+        return (torch.sin(np.pi*x[:,0])*torch.sinh(np.pi*x[:,1])*x[:,2]).reshape(-1,1) # 2D Case
     
     def solution(x):
-        # return (x[:,0]/2+x[:,1]/2-x[:,2]).reshape(-1,1)        # 3D Case 1
-        # return (x[:,0]-x[:,1]).reshape(-1,1)                   # 2D Case 1
-        # return torch.exp(x[:,0]-x[:,1]).reshape(-1,1)          # 2D Case 2
-        # return torch.exp(x[:,0]+x[:,1]).reshape(-1,1)          # 2D Case 3
-        # return (torch.sin(torch.pi*x[:,0])*torch.sinh(torch.pi*x[:,1])).reshape(-1,1)         # 2D Case 4
-        # return (torch.sin(np.pi*x[:,0])*torch.sinh(np.pi*x[:,1])+5).reshape(-1,1)       # 2D Case 5
-        return (torch.sin(np.pi*x[:,0])*torch.sinh(np.pi*x[:,1])+torch.cos(np.pi*x[:,0])*torch.cos(np.pi*x[:,1])).reshape(-1,1)  
-        # return (torch.sin(torch.pi*x[:,0])*torch.sinh(torch.pi*x[:,1])+x[:,2]+5).reshape(-1,1)       # 3D Case 2
-        # return (torch.sin(torch.pi*x[:,0])*torch.sinh(torch.pi*x[:,1])*x[:,2]).reshape(-1,1)       # 3D Case 3
-        # return (torch.sin(np.pi*x[:,0])*torch.sinh(np.pi*x[:,1])*x[:,2]+5).reshape(-1,1)
+        return (torch.sin(np.pi*x[:,0])*torch.sinh(np.pi*x[:,1])*x[:,2]+\
+            torch.cos(np.pi*x[:,0])*torch.cos(np.pi*x[:,1])*torch.cos(np.pi*x[:,2])).reshape(-1,1)  
 
     # determine inverse
     def inverse(x):
-        # return torch.exp(x[:,0]+x[:,1]+x[:,2]).reshape(-1,1)    # 3D Case 1
-        # return torch.exp(x[:,0]+x[:,1]).reshape(-1,1)           # 2D Case 1
-        # return torch.exp(-x[:,0]+x[:,1]).reshape(-1,1)          # 2D Case 2
-        # return torch.exp(-x[:,0]-x[:,1]).reshape(-1,1)          # 2D Case 3
-        # return torch.exp(-30*((x[:,0]-0.5)**2+(x[:,1]-0.5)**2)).reshape(-1,1)          # 2D Case 4
-        # return torch.exp(-5*((x[:,0]-0.5)**2+(x[:,1]-0.5)**2)).reshape(-1,1)          # 2D Case 5
-        return (torch.exp(-30*((x[:,0]-0.3)**2+(x[:,1]-0.3)**2))+torch.exp(-50*((x[:,0]-0.6)**2+(x[:,1]-0.8)**2))).reshape(-1,1)
-        # return torch.exp(-30*((x[:,0]-0.5)**2+(x[:,1]-0.5)**2+(x[:,2]-0.5)**2)).reshape(-1,1)          # 3D Case 2
+        return torch.exp(-30*((x[:,0]-0.5)**2+(x[:,1]-0.5)**2+(x[:,2]-0.5)**2)).reshape(-1,1)          # 3D Case 2
 
     pde = PDE(equation, solution, inverse, args.xmin, args.xmax)
 
@@ -72,36 +56,6 @@ def main(args):
         loss_terms = (loss_i.detach(), loss_g[0].detach(), loss_g[1].detach(), loss_g[2].detach(), \
             loss_o.detach(), loss_b.detach())
         return loss_total, loss_terms
-    
-    # # loss function with g-fit term
-    # def loss_func(x, b, o, noisy_data, args):
-    #     loss_i = loss.interior_loss(x)
-    #     loss_g = loss.g_loss(x, g_func)
-    #     loss_o = loss.observe_loss(o, noisy_data)
-    #     loss_total = loss_i + \
-    #                 args.lambda11*loss_g[0] + args.lambda12*loss_g[1] + args.lambda13*loss_g[2] + \
-    #                 args.lambda2*loss_o 
-    #     loss_terms = (loss_i.detach(), loss_g[0].detach(), loss_g[1].detach(), loss_g[2].detach(), loss_o.detach())
-    #     return loss_total, loss_terms
-
-    # # conventional loss function with dirichlet boundary-fit term
-    # def loss_func(x, b, o, noisy_data, args):
-    #     loss_i = loss.interior_loss(x)
-    #     loss_b_s = loss.dirichlet_boundary_loss(b,'s')
-    #     loss_b_u = loss.dirichlet_boundary_loss(b,'u')
-    #     loss_o = loss.observe_loss(o, noisy_data)
-    #     loss_total = loss_i + args.lambda11*loss_b_s + args.lambda12*loss_b_u + args.lambda2*loss_o
-    #     loss_terms = (loss_i.detach(), loss_b_s.detach(), loss_b_u.detach(), loss_o.detach())
-    #     return loss_total, loss_terms
-    
-    # # conventional loss function with neumann boundary-fit term
-    # def loss_func(x, b, o, noisy_data, args):
-    #     loss_i = loss.interior_loss(x)
-    #     loss_b = loss.neumann_boundary_loss(b)
-    #     loss_o = loss.observe_loss(o, noisy_data)
-    #     loss_total = loss_i + args.lambda1*loss_b + args.lambda2*loss_o
-    #     loss_terms = (loss_i.detach(), loss_b.detach(), loss_o.detach())
-    #     return loss_total, loss_terms
 
     # determine assessment metric
     def metric_func(pred, exact):
@@ -124,9 +78,6 @@ def main(args):
         LoggingPrinter(os.path.join(args.save_path, args.log_name+'.txt'))
         print('Current time is', time.strftime('%Y-%m-%d %H:%M:%S',time.localtime(time.time())))
         print_args(args)
-        # print('Exact solution of u     = sin(pi*x)sinh(pi*y)+5')
-        # print('Exact solution of sigma = exp(-5(x-0.5)^2+(y-0.5)^2)')
-        # print('Loss functional contains [PDE-fit term], [G-fit term] and [data-fit term]')
         # start training
         solver.train()
         # write training arguments to csv file
@@ -140,7 +91,7 @@ def main(args):
 
 if __name__ == "__main__":
     # parse arguments
-    parser = argparse.ArgumentParser(prog='DL-EIT', usage=print_usage())
+    parser = argparse.ArgumentParser(prog='DeepEIT', usage=print_usage())
     subparsers = parser.add_subparsers(dest = 'mode', required=True, help='train | test | plot')
 
     # shared paramters
@@ -149,11 +100,11 @@ if __name__ == "__main__":
     parser.add_argument('--num_channels', type=int, default=10, help='hidden layer width of network')
     parser.add_argument('--num_blocks', type=int, default=3, help='number of residual blocks of network')
     parser.add_argument('--acti', type=str, default='swish', help='activation function of the network')
-    parser.add_argument('--dim', type=int, default=2, help='dimension of space')
+    parser.add_argument('--dim', type=int, default=3, help='dimension of space')
     parser.add_argument('--xmin', type=float, default=0, help='lower bound of Omega')
     parser.add_argument('--xmax', type=float, default=1, help='upper bound of Omega')
-    parser.add_argument('--csv_path', type=str, default='./result/new/params.csv', help='path of csv path to store training parameteres')
-    parser.add_argument('--save_path', type=str, default='./result/paper/2D/test', help='saved path of the results')
+    parser.add_argument('--csv_path', type=str, default='./result/params.csv', help='path of csv path to store training parameteres')
+    parser.add_argument('--save_path', type=str, default='./result/test', help='saved path of the results')
     # training parameters
     subparser_train = subparsers.add_parser('train', help='training mode')
     subparser_train.add_argument('--num_interior_points', type=int, default=1000, help='number of interior points inside the domain Omega')
@@ -163,13 +114,11 @@ if __name__ == "__main__":
     subparser_train.add_argument('--std', type=float, default=0, help='standard deviation of noise added to the observed data')
     subparser_train.add_argument('--omin', type=float, default=0.375, help='lower bound of Omega_0')
     subparser_train.add_argument('--omax', type=float, default=0.625, help='upper bound of Omega_0')
-    # subparser_train.add_argument('--lambda1', type=float, default=200, help='hyper-parameter for the boundary loss')
-    # subparser_train.add_argument('--lambda2', type=float, default=220, help='hyper-parameter for the supervised loss')
-    subparser_train.add_argument('--lambda11', type=float, default=1e-3, help='hyper-parameter for the g loss')
-    subparser_train.add_argument('--lambda12', type=float, default=5e-3, help='hyper-parameter for the g loss')
-    subparser_train.add_argument('--lambda13', type=float, default=5e-2, help='hyper-parameter for the g loss')
-    subparser_train.add_argument('--lambda2', type=float, default=125, help='hyper-parameter for the supervised loss')
-    subparser_train.add_argument('--lambda3', type=float, default=150, help='hyper-parameter for the boundary loss')
+    subparser_train.add_argument('--lambda11', type=float, default=1e-2, help='hyper-parameter for the g loss')
+    subparser_train.add_argument('--lambda12', type=float, default=1e-3, help='hyper-parameter for the g loss')
+    subparser_train.add_argument('--lambda13', type=float, default=1e-3, help='hyper-parameter for the g loss')
+    subparser_train.add_argument('--lambda2', type=float, default=20, help='hyper-parameter for the supervised loss')
+    subparser_train.add_argument('--lambda3', type=float, default=100, help='hyper-parameter for the boundary loss')
     subparser_train.add_argument('--model_name', type=str, default='model', help='name of the models')
     subparser_train.add_argument('--lr_u', type=float, default=1e-2, help='learning rate of model_u')
     subparser_train.add_argument('--lr_s', type=float, default=1e-2, help='learning rate of model_s')
