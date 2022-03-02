@@ -28,7 +28,7 @@ We perform the proposed algorithm on 3-dimensional medium, and the results are s
 ## Dependencies
 The code has been tested on 
 - macOS Big Sur & Python 3.8.8 & PyTorch 1.10.0
-- Ubuntu 18.04.5 & 3.8.11 & PyTorch 1.0.0+cu111
+- Ubuntu 18.04.5 & 3.8.11 & PyTorch 1.9.0+cu111
 
 ## Usage
 ```
@@ -43,14 +43,14 @@ usage:
 
     optional arguments:
       -h, --help            show this help message and exit
-      --device DEVICE       cpu | cuda
-      --seed SEED           random seed
+      --device              cpu | cuda
+      --seed                random seed
       --num_channels        hidden layer width of network
       --num_blocks          number of residual blocks of network
-      --acti ACTI           activation function of the network
-      --dim DIM             dimension of space
-      --xmin XMIN           lower bound of Omega
-      --xmax XMAX           upper bound of Omega
+      --acti                activation function of the network
+      --dim                 dimension of space
+      --xmin                lower bound of Omega
+      --xmax                upper bound of Omega
       --csv_path            path of csv path to store training parameteres
       --save_path           saved path of the results
 ```
